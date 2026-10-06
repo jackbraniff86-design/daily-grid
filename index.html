@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Daily Grid</title>
+<meta name="description" content="Sixteen words, four groups of four. Find the groups. A new grid every day.">
+<meta property="og:title" content="The Daily Grid">
+<meta property="og:description" content="Sixteen words, four groups of four. Find the groups. A new grid every day.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap">
+<style>
+/* Same family as The Daily Rep: one monospace face, hairlines, square corners. The four group colours are the only colour on the page. */
+:root{
+  --bg:#edf0f2; --card:#f7f9fa; --ink:#1b2229; --muted:#6a7681; --line:#cfd7dd; --tile:#f7f9fa; --tile-on:#1b2229; --tile-on-ink:#f7f9fa;
+  --accent:#2f5d8a;
+  --l1:#e9d26a; --l2:#9fcf8a; --l3:#8fb6dc; --l4:#c3a0d8; --lvl-ink:#1b2229;
+  --f:"DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#11161b; --card:#182028; --ink:#e4eaee; --muted:#85929e; --line:#28323c; --tile:#182028; --tile-on:#e4eaee; --tile-on-ink:#11161b;
+  --accent:#8fb6dc;
+  --l1:#c9ad3e; --l2:#6fae5c; --l3:#5f90bd; --l4:#9d74b8; --lvl-ink:#11161b;
+}}
+:root[data-theme="dark"]{
+  --bg:#11161b; --card:#182028; --ink:#e4eaee; --muted:#85929e; --line:#28323c; --tile:#182028; --tile-on:#e4eaee; --tile-on-ink:#11161b;
+  --accent:#8fb6dc;
+  --l1:#c9ad3e; --l2:#6fae5c; --l3:#5f90bd; --l4:#9d74b8; --lvl-ink:#11161b;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:15px;line-height:1.55;letter-spacing:-.01em;-webkit-text-size-adjust:100%;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
+#app{max-width:540px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;gap:18px;
+  padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(22px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+.home,.game,.q{animation:rise .4s cubic-bezier(.2,.7,.2,1) both;display:flex;flex-direction:column;gap:16px;flex:1}
+.home{justify-content:center;gap:20px}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-weight:500;font-size:15px;letter-spacing:-.02em;text-transform:lowercase;background:none;border:0;color:var(--ink);padding:0;cursor:pointer}
+.logo i,h1 i{font-style:normal;color:var(--accent)}
+.tools{display:flex;gap:6px}
+button{font:inherit;cursor:pointer;color:inherit;letter-spacing:inherit}
+.mini{background:transparent;border:1px solid var(--line);border-radius:4px;padding:5px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:border-color .2s,color .2s}
+.mini:hover{border-color:var(--ink);color:var(--ink)}
+.btn{display:block;width:100%;background:var(--ink);color:var(--bg);border:1px solid var(--ink);border-radius:4px;padding:16px 18px;font-weight:500;font-size:13px;letter-spacing:.16em;text-transform:uppercase;transition:opacity .2s,transform .15s}
+.btn:hover{opacity:.88} .btn:active{transform:scale(.99)}
+.btn:disabled{opacity:.3;cursor:default;transform:none}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+h1{font-weight:500;font-size:clamp(34px,10.5vw,58px);line-height:1;letter-spacing:-.06em;text-transform:lowercase;margin:0}
+.caret{display:inline-block;width:.5em;height:.82em;margin-left:.08em;background:var(--accent);vertical-align:baseline;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+h2{font-weight:500;font-size:clamp(19px,5.2vw,23px);line-height:1.3;letter-spacing:-.03em;margin:0;text-wrap:balance}
+p{margin:0}
+.lede{font-size:15px;color:var(--muted)}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fact{border:1px solid var(--line);border-radius:4px;padding:12px}
+.fact b{display:block;font-size:20px;font-weight:500;font-variant-numeric:tabular-nums}
+.fact span{font-size:11px;color:var(--muted)}
+.hero{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.hero b{font-weight:500;font-size:clamp(40px,12vw,58px);line-height:1;letter-spacing:-.05em}
+.hero span{color:var(--muted);font-size:13px}
+.spacer{flex:1}
+.hint{font-size:12px;color:var(--muted);text-align:center;min-height:1.2em}
+.key{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.key i{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+/* the board */
+.ghead{display:flex;justify-content:space-between;align-items:baseline}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.tile{position:relative;aspect-ratio:1/.78;border:1px solid var(--line);background:var(--tile);border-radius:4px;display:flex;align-items:center;justify-content:center;
+  padding:4px;font-weight:500;font-size:clamp(11px,3.3vw,15px);letter-spacing:-.02em;text-transform:uppercase;transition:background .15s,color .15s,border-color .15s,transform .15s;user-select:none;-webkit-user-select:none;overflow:hidden;line-height:1.1;text-align:center;word-break:break-word}
+.tile.long{font-size:clamp(9px,2.6vw,12.5px);letter-spacing:-.04em}
+.tile.xlong{font-size:clamp(8px,2.2vw,11px);letter-spacing:-.05em}
+.tile:hover{border-color:var(--ink)}
+.tile.on{background:var(--tile-on);color:var(--tile-on-ink);border-color:var(--tile-on);transform:scale(.97)}
+.tile.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.tile.bounce{animation:bounce .35s}
+@keyframes bounce{50%{transform:translateY(-6px)}}
+.solved{grid-column:1/-1;border-radius:4px;padding:12px 14px;color:var(--lvl-ink);display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;animation:pop .4s cubic-bezier(.2,.7,.2,1)}
+@keyframes pop{from{opacity:0;transform:scale(.96)}}
+.solved b{font-weight:500;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.solved span{font-size:12px;letter-spacing:.02em;opacity:.85}
+.l1{background:var(--l1)} .l2{background:var(--l2)} .l3{background:var(--l3)} .l4{background:var(--l4)}
+.lives{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);justify-content:center}
+.lives i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ink);transition:opacity .3s,transform .3s}
+.lives i.gone{opacity:.18;transform:scale(.7)}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.toast{position:fixed;left:50%;top:max(18px,env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+.toast.show{opacity:1}
+.squares{display:flex;flex-direction:column;gap:2px;font-size:20px;line-height:1.15;letter-spacing:1px}
+.rows{display:flex;flex-direction:column;gap:6px}
+.rowline{border-radius:4px;padding:9px 12px;color:var(--lvl-ink);display:flex;justify-content:space-between;gap:10px;font-size:12px}
+.rowline b{font-weight:500;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.rowline span{text-align:right;opacity:.85}
+.howto{display:flex;flex-direction:column;gap:10px;font-size:14px;color:var(--muted)}
+.howto b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="puzzles.js"></script>
+<script>
+const CONFIG = { launch:'2026-10-06', mistakes:4, name:'The Daily Grid' };
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const dstr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function hash(str){ let h=1779033703^str.length;
+  for(let i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),3432918353); h=h<<13|h>>>19; }
+  h=Math.imul(h^h>>>16,2246822507); h=Math.imul(h^h>>>13,3266489909); return (h^h>>>16)>>>0; }
+function mulberry32(a){ return () => { a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function shuffle(arr,rng=Math.random){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const LOCAL = ['localhost','127.0.0.1','','[::1]'].includes(location.hostname) || location.protocol==='file:';
+const params = new URLSearchParams(location.search);
+const realToday = () => Math.round((Date.parse(dstr(new Date())+'T00:00:00Z') - Date.parse(CONFIG.launch+'T00:00:00Z'))/864e5)+1;
+const previewDay = LOCAL && params.get('day') ? Number(params.get('day')) : 0;
+const today = () => previewDay || realToday();
+const puzzleFor = n => PUZZLES[((n-1) % PUZZLES.length + PUZZLES.length) % PUZZLES.length];
+const SQ = {1:'🟨',2:'🟩',3:'🟦',4:'🟪'};
+
+// ---------- saved state ----------
+const KEY='dailyGrid.v1';
+let data = {days:{}, last:0, streak:0, maxStreak:0, theme:''};
+if(!previewDay){ try{ Object.assign(data, JSON.parse(localStorage.getItem(KEY))||{}); }catch(e){} }
+const save = () => { if(previewDay) return; try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){} };
+const streakNow = () => (data.last===realToday() || data.last===realToday()-1) ? data.streak : 0;
+function applyTheme(){ if(data.theme) document.documentElement.dataset.theme=data.theme; else delete document.documentElement.dataset.theme; }
+applyTheme();
+const title = m => m===0 ? 'Perfect' : m===1 ? 'Great' : m===2 ? 'Solid' : m===3 ? 'Phew' : 'Next time';
+
+// ---------- session ----------
+const app = $('#app');
+let session = null, tick = null;
+function dayState(n){ return data.days[n] || (data.days[n] = {guesses:[], solved:[], done:false, won:false}); }
+function startSession(n){
+  const p = puzzleFor(n), st = dayState(n);
+  const byWord = {}; p.groups.forEach(g => g.words.forEach(w => byWord[w] = g.level));
+  const order = shuffle(p.groups.flatMap(g=>g.words), mulberry32(hash('grid-'+n)));
+  session = { n, p, st, byWord, order, sel: [] };
+}
+function shell(inner){
+  clearInterval(tick);
+  app.innerHTML = `<div class="top"><button class="logo" id="home">the daily <i>grid</i></button><div class="tools">
+      <button class="mini" id="howto">How to play</button><button class="mini" id="theme" aria-label="Toggle theme">◐</button></div></div>${inner}`;
+  $('#home').addEventListener('click', home);
+  $('#howto').addEventListener('click', howto);
+  $('#theme').addEventListener('click', ()=>{ const dark = data.theme ? data.theme==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    data.theme = dark ? 'light' : 'dark'; applyTheme(); save(); });
+}
+let toastT; function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1600); }
+
+// ---------- screens ----------
+function home(){
+  session=null; const n=today(), day=data.days[n], done=day&&day.done, st=streakNow();
+  shell(`<div class="home">
+    <div><p class="eyebrow">Grid #${n}${previewDay?' · preview':''}</p><h1>the daily <i>grid</i><span class="caret"></span></h1></div>
+    <p class="lede">Sixteen words, four groups of four. Find the groups. One grid a day, same for everyone.</p>
+    <div class="key"><span><i class="l1"></i>easiest</span><span><i class="l2"></i></span><span><i class="l3"></i></span><span><i class="l4"></i>hardest</span></div>
+    ${st ? `<div class="hero"><b>${st}</b><span>day streak</span></div>` : ''}
+    <div class="spacer"></div>
+    <button class="btn" id="play">${done ? 'See today\'s result' : day && day.guesses.length ? 'Carry on' : 'Play today\'s grid'}</button>
+    ${Object.keys(data.days).length ? '<button class="btn ghost" id="stats">Your stats</button>' : ''}
+  </div>`);
+  $('#play').addEventListener('click', ()=>{ startSession(n); session.st.done ? result() : game(); });
+  const s=$('#stats'); if(s) s.addEventListener('click', stats);
+}
+function howto(){
+  session=null;
+  shell(`<div class="q"><h2>How to play</h2><div class="howto">
+    <p><b>Find four groups of four</b> that share something in common.</p>
+    <p>Tap four words, then <b>submit</b>. Right, and the group locks in. Wrong, and you lose one of your four lives.</p>
+    <p>Every grid has at least one word that looks like it belongs in two groups. There's still only one answer: work out which group is one short.</p>
+    <p>Colours show how hard each group was: <span class="key"><span><i class="l1"></i>easiest</span><span><i class="l2"></i></span><span><i class="l3"></i></span><span><i class="l4"></i>hardest</span></span></p>
+    <p>A new grid lands every day at midnight.</p></div>
+    <div class="spacer"></div><button class="btn" id="back">Back</button></div>`);
+  $('#back').addEventListener('click', home);
+}
+function lenClass(w){ return w.length>=10 ? 'xlong' : w.length>=8 ? 'long' : ''; }
+function game(){
+  const {n, p, st} = session;
+  const solvedGroups = st.solved.map(l => p.groups.find(g=>g.level===l));
+  const remaining = session.order.filter(w => !st.solved.includes(session.byWord[w]));
+  const lives = CONFIG.mistakes - st.guesses.filter(g=>!g.ok).length;
+  shell(`<div class="game">
+    <div class="ghead"><p class="eyebrow">Grid #${n}${previewDay?' · preview':''}</p><p class="eyebrow">${remaining.length/4} to find</p></div>
+    <div class="board" id="board">
+      ${solvedGroups.map(g=>`<div class="solved l${g.level}"><b>${esc(g.label)}</b><span>${g.words.map(esc).join(', ')}</span></div>`).join('')}
+      ${remaining.map(w=>`<button class="tile ${lenClass(w)} ${session.sel.includes(w)?'on':''}" data-w="${esc(w)}" aria-pressed="${session.sel.includes(w)}">${esc(w)}</button>`).join('')}
+    </div>
+    <div class="lives" aria-label="${lives} lives left">lives ${Array.from({length:CONFIG.mistakes},(_,i)=>`<i class="${i<lives?'':'gone'}"></i>`).join('')}</div>
+    <div class="row"><button class="btn ghost" id="shuffle">Shuffle</button><button class="btn ghost" id="clear" ${session.sel.length?'':'disabled'}>Clear</button><button class="btn" id="submit" ${session.sel.length===4?'':'disabled'}>Submit</button></div>
+  </div>`);
+  app.querySelectorAll('.tile').forEach(t => t.addEventListener('click', ()=>{
+    const w=t.dataset.w, i=session.sel.indexOf(w);
+    if(i>=0) session.sel.splice(i,1); else if(session.sel.length<4) session.sel.push(w); else return;
+    t.classList.toggle('on', session.sel.includes(w)); t.setAttribute('aria-pressed', session.sel.includes(w));
+    $('#clear').disabled = !session.sel.length; $('#submit').disabled = session.sel.length!==4;
+  }));
+  $('#shuffle').addEventListener('click', ()=>{ session.order = shuffle(session.order); game(); });
+  $('#clear').addEventListener('click', ()=>{ session.sel=[]; game(); });
+  $('#submit').addEventListener('click', submit);
+}
+function submit(){
+  const {p, st} = session; if(session.sel.length!==4) return;
+  const levels = session.sel.map(w=>session.byWord[w]);
+  const sig = session.sel.slice().sort().join('|');
+  if(st.guesses.some(g=>g.sig===sig)){ toast('Already tried that'); return; }
+  const counts = {}; levels.forEach(l=>counts[l]=(counts[l]||0)+1);
+  const best = Math.max(...Object.values(counts));
+  const ok = best===4;
+  st.guesses.push({levels, ok, sig}); 
+  const tiles = [...app.querySelectorAll('.tile.on')];
+  if(ok){
+    const lvl = levels[0]; st.solved.push(lvl); session.sel=[];
+    tiles.forEach((t,i)=>setTimeout(()=>t.classList.add('bounce'), i*70));
+    const won = st.solved.length===4;
+    if(won){ st.done=true; st.won=true; finish(); }
+    save(); setTimeout(game, 420); if(won) setTimeout(result, 1300);
+    return;
+  }
+  tiles.forEach(t=>t.classList.add('shake'));
+  const wrong = st.guesses.filter(g=>!g.ok).length;
+  if(wrong>=CONFIG.mistakes){
+    st.done=true; st.won=false; finish(); save();
+    setTimeout(()=>{ toast('Out of lives'); revealLoss(); }, 500); return;
+  }
+  toast(best===3 ? 'One away…' : 'Not quite');
+  save(); setTimeout(()=>{ session.sel=[]; game(); }, 500);
+}
+function finish(){
+  const n=session.n; if(previewDay) return;
+  if(session.st.won){ if(data.last!==n){ data.streak = data.last===n-1 ? data.streak+1 : 1; data.last=n; data.maxStreak=Math.max(data.maxStreak,data.streak); } }
+  else { data.last = n; data.streak = 0; }   // a lost day keeps the record but ends the run
+}
+function revealLoss(){
+  // reveal the unsolved groups one by one, easiest first, then show the result
+  const {p, st} = session; const left = p.groups.filter(g=>!st.solved.includes(g.level)).sort((a,b)=>a.level-b.level);
+  let i=0; const step=()=>{ if(i>=left.length) return setTimeout(result, 900); st.solved.push(left[i].level); i++; game(); setTimeout(step, 800); };
+  step();
+}
+function shareText(){
+  const {n, st} = session;
+  const rows = st.guesses.map(g=>g.levels.map(l=>SQ[l]).join('')).join('\n');
+  const head = st.won ? `${CONFIG.name} #${n} · ${title(st.guesses.filter(g=>!g.ok).length)}` : `${CONFIG.name} #${n} · ✗`;
+  return `${head}\n${rows}\n${location.origin}${location.pathname}`;
+}
+function result(){
+  const {n, p, st} = session; const m = st.guesses.filter(g=>!g.ok).length;
+  const inOrder = st.guesses.filter(g=>g.ok).map(g=>p.groups.find(x=>x.level===g.levels[0]));
+  const missed = p.groups.filter(g=>!inOrder.includes(g)).sort((a,b)=>a.level-b.level);
+  shell(`<div class="q">
+    <div><p class="eyebrow">Grid #${n}${previewDay?' · preview':''}</p><h2>${st.won ? esc(title(m)) : 'Out of lives'}</h2>
+    <p class="lede">${st.won ? (m===0 ? 'Four for four, no slips.' : `Solved with ${m} wrong guess${m===1?'':'es'}.`) : `${inOrder.length} of 4 found. Here's the rest.`}</p></div>
+    <div class="squares" aria-label="Your guesses">${st.guesses.map(g=>`<span>${g.levels.map(l=>SQ[l]).join('')}</span>`).join('')}</div>
+    <div class="rows">${inOrder.concat(missed).map(g=>`<div class="rowline l${g.level}"><b>${esc(g.label)}</b><span>${g.words.map(esc).join(', ')}</span></div>`).join('')}</div>
+    <div class="facts">
+      <div class="fact"><b>${streakNow()}</b><span>day streak</span></div>
+      <div class="fact"><b id="cd">--:--:--</b><span>to the next grid</span></div>
+      <div class="fact"><b>${Object.values(data.days).filter(d=>d.done).length}</b><span>days played</span></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="share">Share result</button><p class="hint" id="shareMsg"></p></div>`);
+  $('#share').addEventListener('click', async ()=>{ const t=shareText(), msg=$('#shareMsg');
+    if(navigator.share && matchMedia('(pointer:coarse)').matches){ try{ await navigator.share({text:t}); return; }catch(e){ if(e && e.name==='AbortError') return; } }
+    try{ await navigator.clipboard.writeText(t); msg.textContent='Copied to clipboard'; }catch(e){ msg.textContent=t; msg.style.whiteSpace='pre-line'; } });
+  countdown('cd');
+}
+function stats(){
+  const days=Object.values(data.days).filter(d=>d.done), n=days.length, won=days.filter(d=>d.won).length;
+  const perfect=days.filter(d=>d.won && d.guesses.every(g=>g.ok)).length;
+  session=null;
+  shell(`<div class="q"><h2>Your stats</h2>
+    <div class="facts"><div class="fact"><b>${n}</b><span>played</span></div><div class="fact"><b>${n?Math.round(100*won/n):'—'}%</b><span>solved</span></div><div class="fact"><b>${perfect}</b><span>perfect</span></div></div>
+    <div class="facts"><div class="fact"><b>${streakNow()}</b><span>current streak</span></div><div class="fact"><b>${data.maxStreak}</b><span>best streak</span></div><div class="fact"><b id="cd">--:--:--</b><span>to the next grid</span></div></div>
+    <div class="spacer"></div><button class="btn" id="back">Back</button></div>`);
+  $('#back').addEventListener('click', home); countdown('cd');
+}
+function countdown(id){
+  const upd=()=>{ const el=$('#'+id); if(!el) return clearInterval(tick); const mid=new Date(); mid.setHours(24,0,0,0); const s=Math.max(0,Math.round((mid-Date.now())/1000));
+    el.textContent=`${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`; };
+  upd(); tick=setInterval(upd,1000);
+}
+if(LOCAL && params.has('bank')){
+  // ?bank (local only): print every grid with its solution and trap note for checking.
+  app.innerHTML = '<div class="q"><h2>Puzzle bank</h2>' + PUZZLES.map(p=>`<div><p class="eyebrow">Grid #${p.id}</p>${p.groups.map(g=>`<div class="rowline l${g.level}"><b>${esc(g.label)}</b><span>${g.words.join(', ')}</span></div>`).join('')}<p class="lede" style="font-size:13px;margin-top:6px">${esc(p.trap||'')}</p></div>`).join('') + '</div>';
+} else home();
+</script>
+</body>
+</html>
