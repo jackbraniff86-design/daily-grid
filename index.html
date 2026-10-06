@@ -141,7 +141,14 @@ const title = m => m===0 ? 'Perfect' : m===1 ? 'Great' : m===2 ? 'Solid' : m===3
 // ---------- session ----------
 const app = $('#app');
 let session = null, tick = null;
-function dayState(n){ return data.days[n] || (data.days[n] = {guesses:[], solved:[], done:false, won:false}); }
+function dayState(n){ return data.days[n] || (data.days[n] = {guesses:[], solved:[], done:false, won:false, ms:0}); }
+// Time on the board: counts only while the game screen is showing and the tab is visible.
+let clockStart = 0;
+function clockOn(){ if(!clockStart) clockStart = Date.now(); }
+function clockOff(){ if(session && clockStart){ session.st.ms = (session.st.ms||0) + Date.now() - clockStart; save(); } clockStart = 0; }
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) clockOff(); else if(session && !session.st.done && app.querySelector('.board')) clockOn(); });
+window.addEventListener('pagehide', clockOff);
+const fmtTime = ms => { const s=Math.round(ms/1000); return `${Math.floor(s/60)}:${pad(s%60)}`; };
 function startSession(n){
   const p = puzzleFor(n), st = dayState(n);
   const byWord = {}; p.groups.forEach(g => g.words.forEach(w => byWord[w] = g.level));
@@ -149,7 +156,7 @@ function startSession(n){
   session = { n, p, st, byWord, order, sel: [] };
 }
 function shell(inner){
-  clearInterval(tick);
+  clearInterval(tick); clockOff();
   app.innerHTML = `<div class="top"><button class="logo" id="home">the daily <i>grid</i></button><div class="tools">
       <button class="mini" id="howto">How to play</button><button class="mini" id="theme" aria-label="Toggle theme">◐</button></div></div>${inner}`;
   $('#home').addEventListener('click', home);
@@ -206,6 +213,7 @@ function game(){
     t.classList.toggle('on', session.sel.includes(w)); t.setAttribute('aria-pressed', session.sel.includes(w));
     $('#clear').disabled = !session.sel.length; $('#submit').disabled = session.sel.length!==4;
   }));
+  if(!st.done) clockOn();
   $('#shuffle').addEventListener('click', ()=>{ session.order = shuffle(session.order); game(); });
   $('#clear').addEventListener('click', ()=>{ session.sel=[]; game(); });
   $('#submit').addEventListener('click', submit);
@@ -238,7 +246,7 @@ function submit(){
   save(); setTimeout(()=>{ session.sel=[]; game(); }, 500);
 }
 function finish(){
-  const n=session.n; if(previewDay) return;
+  clockOff(); const n=session.n; if(previewDay) return;
   if(session.st.won){ if(data.last!==n){ data.streak = data.last===n-1 ? data.streak+1 : 1; data.last=n; data.maxStreak=Math.max(data.maxStreak,data.streak); } }
   else { data.last = n; data.streak = 0; }   // a lost day keeps the record but ends the run
 }
@@ -251,7 +259,7 @@ function revealLoss(){
 function shareText(){
   const {n, st} = session;
   const rows = st.guesses.map(g=>g.levels.map(l=>SQ[l]).join('')).join('\n');
-  const head = st.won ? `${CONFIG.name} #${n} · ${title(st.guesses.filter(g=>!g.ok).length)}` : `${CONFIG.name} #${n} · ✗`;
+  const head = st.won ? `${CONFIG.name} #${n} · ${title(st.guesses.filter(g=>!g.ok).length)} · ${fmtTime(st.ms||0)}` : `${CONFIG.name} #${n} · ✗`;
   return `${head}\n${rows}\n${location.origin}${location.pathname}`;
 }
 function result(){
@@ -260,7 +268,7 @@ function result(){
   const missed = p.groups.filter(g=>!inOrder.includes(g)).sort((a,b)=>a.level-b.level);
   shell(`<div class="q">
     <div><p class="eyebrow">Grid #${n}${previewDay?' · preview':''}</p><h2>${st.won ? esc(title(m)) : 'Out of lives'}</h2>
-    <p class="lede">${st.won ? (m===0 ? 'Four for four, no slips.' : `Solved with ${m} wrong guess${m===1?'':'es'}.`) : `${inOrder.length} of 4 found. Here's the rest.`}</p></div>
+    <p class="lede">${st.won ? (m===0 ? 'Four for four, no slips.' : `Solved with ${m} wrong guess${m===1?'':'es'}.`) + ` ${fmtTime(st.ms||0)} on the board.` : `${inOrder.length} of 4 found. Here's the rest.`}</p></div>
     <div class="squares" aria-label="Your guesses">${st.guesses.map(g=>`<span>${g.levels.map(l=>SQ[l]).join('')}</span>`).join('')}</div>
     <div class="rows">${inOrder.concat(missed).map(g=>`<div class="rowline l${g.level}"><b>${esc(g.label)}</b><span>${g.words.map(esc).join(', ')}</span></div>`).join('')}</div>
     <div class="facts">
