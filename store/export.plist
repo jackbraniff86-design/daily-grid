@@ -14,8 +14,8 @@
 	<string>Apple Distribution</string>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>uk.co.themorningflight.app</key>
-		<string>Morning Flight App Store</string>
+		<key>uk.co.thedailygrid.app</key>
+		<string>The Daily Grid App Store</string>
 	</dict>
 	<key>uploadSymbols</key>
 	<true/>
