@@ -1,7 +1,8 @@
 # The Daily Grid — App Store notes
 
 - Bundle id uk.co.thedailygrid.app (bundle id record 7DLRNZW2JV), team 8759KGVN28.
-- App Store Connect app record: not created yet (the API cannot create apps; Jack creates it at appstoreconnect.apple.com → My Apps → + → iOS, pick the bundle id above).
+- App Store Connect app id 6819956925 (created by Jack 7 Oct 2026; the API cannot create apps).
+- TestFlight internal group "Grid internal" 3e9915b6-861b-4364-8321-fc91afc07b47 (access to all builds, so CLI uploads need no attach step). Build 1.0 (1) uploaded and VALID 7 Oct 2026.
 - Signing: Apple Distribution cert 529GT85345 whose key lives in ~/Library/Keychains/mf-dist.keychain-db (password mfpass). App Store profile "The Daily Grid App Store" (F8AQCQ2V7T), installed under ~/Library/Developer/Xcode/UserData/Provisioning Profiles.
 - The web files are the ones at the repo root; `npm run sync` copies them into www/ and the Xcode project.
 
