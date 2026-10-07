@@ -45,7 +45,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:15px;l
 .logo{font-weight:500;font-size:15px;letter-spacing:-.02em;text-transform:lowercase;background:none;border:0;color:var(--ink);padding:0;cursor:pointer}
 .logo i,h1 i{font-style:normal;color:var(--accent)}
 .tools{display:flex;gap:6px}
-button{font:inherit;cursor:pointer;color:inherit;letter-spacing:inherit}
+button{font:inherit;cursor:pointer;color:inherit;letter-spacing:inherit;touch-action:manipulation;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 .mini{background:transparent;border:1px solid var(--line);border-radius:4px;padding:5px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:border-color .2s,color .2s}
 .mini:hover{border-color:var(--ink);color:var(--ink)}
 .btn{display:block;width:100%;background:var(--ink);color:var(--bg);border:1px solid var(--ink);border-radius:4px;padding:16px 18px;font-weight:500;font-size:13px;letter-spacing:.16em;text-transform:uppercase;transition:opacity .2s,transform .15s}
@@ -109,7 +109,9 @@ p{margin:0}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="puzzles.js"></script>
 <script>
-const CONFIG = { launch:'2026-10-06', mistakes:4, name:'The Daily Grid' };
+const CONFIG = { launch:'2026-10-06', mistakes:4, name:'The Daily Grid', site:'https://jackbraniff86-design.github.io/daily-grid/' };
+// Inside the iPhone app (Capacitor) the page is served from the bundle, so sharing uses the native sheet and the public URL.
+const CAP = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? window.Capacitor : null;
 const $ = (s, el=document) => el.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2,'0');
@@ -146,7 +148,8 @@ function dayState(n){ return data.days[n] || (data.days[n] = {guesses:[], solved
 let clockStart = 0;
 function clockOn(){ if(!clockStart) clockStart = Date.now(); }
 function clockOff(){ if(session && clockStart){ session.st.ms = (session.st.ms||0) + Date.now() - clockStart; save(); } clockStart = 0; }
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden) clockOff(); else if(session && !session.st.done && app.querySelector('.board')) clockOn(); });
+let shownDay = 0;
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && shownDay && shownDay!==today()){ home(); return; } if(document.hidden) clockOff(); else if(session && !session.st.done && app.querySelector('.board')) clockOn(); });
 window.addEventListener('pagehide', clockOff);
 const fmtTime = ms => { const s=Math.round(ms/1000); return `${Math.floor(s/60)}:${pad(s%60)}`; };
 function startSession(n){
@@ -168,7 +171,7 @@ let toastT; function toast(msg){ const t=$('#toast'); t.textContent=msg; t.class
 
 // ---------- screens ----------
 function home(){
-  session=null; const n=today(), day=data.days[n], done=day&&day.done, st=streakNow();
+  session=null; const n=today(); shownDay=n; const day=data.days[n], done=day&&day.done, st=streakNow();
   shell(`<div class="home">
     <div><p class="eyebrow">Grid #${n}${previewDay?' · preview':''}</p><h1>the daily <i>grid</i><span class="caret"></span></h1></div>
     <p class="lede">Sixteen words, four groups of four. Find the groups. One grid a day, same for everyone.</p>
@@ -260,7 +263,7 @@ function shareText(){
   const {n, st} = session;
   const rows = st.guesses.map(g=>g.levels.map(l=>SQ[l]).join('')).join('\n');
   const head = st.won ? `${CONFIG.name} #${n} · ${title(st.guesses.filter(g=>!g.ok).length)} · ${fmtTime(st.ms||0)}` : `${CONFIG.name} #${n} · ✗`;
-  return `${head}\n${rows}\n${location.origin}${location.pathname}`;
+  return `${head}\n${rows}\n${CONFIG.site}`;
 }
 function result(){
   const {n, p, st} = session; const m = st.guesses.filter(g=>!g.ok).length;
@@ -279,6 +282,7 @@ function result(){
     <div class="spacer"></div>
     <button class="btn" id="share">Share result</button><p class="hint" id="shareMsg"></p></div>`);
   $('#share').addEventListener('click', async ()=>{ const t=shareText(), msg=$('#shareMsg');
+    if(CAP && CAP.Plugins && CAP.Plugins.Share){ try{ await CAP.Plugins.Share.share({text:t}); }catch(e){} return; }
     if(navigator.share && matchMedia('(pointer:coarse)').matches){ try{ await navigator.share({text:t}); return; }catch(e){ if(e && e.name==='AbortError') return; } }
     try{ await navigator.clipboard.writeText(t); msg.textContent='Copied to clipboard'; }catch(e){ msg.textContent=t; msg.style.whiteSpace='pre-line'; } });
   countdown('cd');

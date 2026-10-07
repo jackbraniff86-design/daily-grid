@@ -1,0 +1,14 @@
+{
+  "appId": "uk.co.thedailygrid.app",
+  "appName": "The Daily Grid",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#edf0f2",
+    "scheme": "The Daily Grid"
+  },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 0, "backgroundColor": "#edf0f2" },
+    "StatusBar": { "style": "DEFAULT", "overlaysWebView": true }
+  }
+}
